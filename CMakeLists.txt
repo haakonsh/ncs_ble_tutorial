@@ -11,7 +11,10 @@ project(NONE)
 # NORDIC SDK APP START
 target_sources(app PRIVATE
   src/main.c
+)
+target_sources(src/main.c PRIVATE
   services/my_service.c
 )
 # NORDIC SDK APP END
 zephyr_library_include_directories(.)
+

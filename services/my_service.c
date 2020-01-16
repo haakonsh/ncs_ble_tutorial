@@ -24,7 +24,10 @@ u8_t data_tx[MAX_TRANSMIT_SIZE];
 int my_service_init(void)
 {
     int err = 0;
-   
+
+    memset(&data_rx, 0, MAX_TRANSMIT_SIZE);
+    memset(&data_tx, 0, MAX_TRANSMIT_SIZE);
+
     return err;
 }
 

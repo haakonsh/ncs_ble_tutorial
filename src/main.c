@@ -131,6 +131,7 @@ void main(void)
 	err = bt_enable(bt_ready);
 
 	if (err) {
+		printk("BLE initialization failed\n");
 		error(); //Catch error
 	}
 	
