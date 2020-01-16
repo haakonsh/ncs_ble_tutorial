@@ -13,6 +13,8 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
+#include "my_service.h"
+
 #define BT_UUID_MY_SERIVCE      BT_UUID_DECLARE_128(MY_SERVICE_UUID)
 #define BT_UUID_MY_SERIVCE_RX   BT_UUID_DECLARE_128(RX_CHARACTERISTIC_UUID)
 #define BT_UUID_MY_SERIVCE_TX   BT_UUID_DECLARE_128(TX_CHARACTERISTIC_UUID)
@@ -53,6 +55,11 @@ static void on_sent(struct bt_conn *conn, void *user_data)
 	printk("Data send, conn %p", conn);
 }
 
+void on_cccd_changed(const struct bt_gatt_attr *attr, u16_t value){
+    // Start sending stuff!
+}
+                        
+
 /* LED Button Service Declaration and Registration */
 BT_GATT_SERVICE_DEFINE(my_service,
 BT_GATT_PRIMARY_SERVICE(BT_UUID_MY_SERIVCE),
@@ -64,7 +71,7 @@ BT_GATT_CHARACTERISTIC(BT_UUID_MY_SERIVCE_TX,
 			       BT_GATT_CHRC_NOTIFY,
 			       BT_GATT_PERM_READ,
                    NULL, NULL, NULL),
-BT_GATT_CCC(lbslc_ccc_cfg_changed,
+BT_GATT_CCC(on_cccd_changed,
         BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 );
 

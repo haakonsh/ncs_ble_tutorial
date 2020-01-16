@@ -33,16 +33,7 @@ static const struct bt_data ad[] = {
 };
 
 static const struct bt_data sd[] = {
-	BT_DATA_BYTES(BT_DATA_UUID128_ALL, LBS_UUID_SERVICE),
-};
-
-data_rx_cb_t data_rx_cb(u8_t *data, u8_t length)
-{
-	//Do stuff
-}
-
-static struct my_service_cb my_service_callbacs = {
-	.data_rx_cb    = data_rx_cb,
+	BT_DATA_BYTES(BT_DATA_UUID128_ALL, MY_SERVICE_UUID),
 };
 
 static void connected(struct bt_conn *conn, u8_t err)
@@ -69,7 +60,7 @@ static bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param)
 static void le_param_updated(struct bt_conn *conn, u16_t interval, u16_t latency, u16_t timeout)
 {
 	printk("BLE link parameters updated; Connection handle:%u, interval:%u, latency:%u, timeout:%u \n",
-			conn.handle, interval, latency, timeout);
+			conn->handle, interval, latency, timeout);
 }
 
 static struct bt_conn_cb conn_callbacks = {
