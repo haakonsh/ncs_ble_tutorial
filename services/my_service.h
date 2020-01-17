@@ -31,3 +31,5 @@ struct my_service_cb
 };
 
 int my_service_init(void);
+
+void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len);

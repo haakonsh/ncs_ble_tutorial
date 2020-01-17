@@ -193,7 +193,7 @@ void main(void)
 	for (;;) 
 	{
 		// Main loop
-		my_service_send(my_connection, &number, sizeof(number));
+		my_service_send(my_connection, (u8_t *)&number, sizeof(number));
 		number++;
 		k_sleep(1000); //ms
 	}
