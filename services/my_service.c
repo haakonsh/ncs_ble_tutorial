@@ -53,11 +53,29 @@ static void on_sent(struct bt_conn *conn, void *user_data)
 {
 	ARG_UNUSED(user_data);
 
-	printk("Data send, conn %p", conn);
+	printk("Data sent to Address %p", conn);
 }
+/* This function is called whenever the CCCD register has been changed by the client*/
+void on_cccd_changed(const struct bt_gatt_attr *attr, u16_t value)
+{
+    ARG_UNUSED(attr);
+    switch(value)
+    {
+        case BT_GATT_CCC_NOTIFY: 
+            // Start sending stuff!
+            break;
 
-void on_cccd_changed(const struct bt_gatt_attr *attr, u16_t value){
-    // Start sending stuff!
+        case BT_GATT_CCC_INDICATE: 
+            // Start sending stuff via indications
+            break;
+
+        case 0: 
+            // Stop sending stuff
+            break;
+        
+        default: 
+            printk("Error, CCCD has been set to an invalid value");     
+    }
 }
                         
 
@@ -87,7 +105,8 @@ void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
     */
     const struct bt_gatt_attr *attr = &my_service.attrs[3]; 
 
-    struct bt_gatt_notify_params params = {
+    struct bt_gatt_notify_params params = 
+    {
         .uuid   = BT_UUID_MY_SERIVCE_TX,
         .attr   = attr,
         .data   = data,
@@ -95,12 +114,17 @@ void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
         .func   = on_sent
     };
 
-    if(bt_gatt_is_subscribed(conn, attr, BT_GATT_CCC_NOTIFY)) {
-	    if(bt_gatt_notify_cb(conn, &params)){
+    // Check whether notifications are enabled or not
+    if(bt_gatt_is_subscribed(conn, attr, BT_GATT_CCC_NOTIFY)) 
+    {
+        // Send the notification
+	    if(bt_gatt_notify_cb(conn, &params))
+        {
             printk("Error, unable to send notification\n");
         }
     }
-    else{
+    else
+    {
         printk("Error, notification not enabled on the selected attribute\n");
     }
 }

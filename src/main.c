@@ -27,28 +27,37 @@
 
 static K_SEM_DEFINE(ble_init_ok, 0, 1);
 
-static const struct bt_data ad[] = {
+static const struct bt_data ad[] = 
+{
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
 };
 
-static const struct bt_data sd[] = {
+static const struct bt_data sd[] = 
+{
 	BT_DATA_BYTES(BT_DATA_UUID128_ALL, MY_SERVICE_UUID),
 };
+
+struct bt_conn *my_connection;
 
 static void connected(struct bt_conn *conn, u8_t err)
 {
 	struct bt_conn_info info; 
 	char addr[BT_ADDR_LE_STR_LEN];
 
-	if (err) {
+	my_connection = conn;
+
+	if (err) 
+	{
 		printk("Connection failed (err %u)\n", err);
 		return;
 	}
-	else if(bt_conn_get_info(conn, &info)){
+	else if(bt_conn_get_info(conn, &info))
+	{
 		printk("Could not parse connection info\n");
 	}
-	else{
+	else
+	{
 		bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 		
 		printk("Connection established!		\n\
@@ -76,15 +85,13 @@ static void le_param_updated(struct bt_conn *conn, u16_t interval, u16_t latency
 {
 	struct bt_conn_info info; 
 	char addr[BT_ADDR_LE_STR_LEN];
-
-	if (err) {
-		printk("Could not update connection parameters (err %u)\n", err);
-		return;
-	}
-	else if(bt_conn_get_info(conn, &info)){
+	
+	if(bt_conn_get_info(conn, &info))
+	{
 		printk("Could not parse connection info\n");
 	}
-	else{
+	else
+	{
 		bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 		
 		printk("Connection parameters updated!	\n\
@@ -92,11 +99,12 @@ static void le_param_updated(struct bt_conn *conn, u16_t interval, u16_t latency
 		New Connection Interval: %u				\n\
 		New Slave Latency: %u					\n\
 		New Connection Supervisory Timeout: %u	\n"
-		, addr, info.role, info.le.interval, info.le.latency, info.le.timeout);
+		, addr, info.le.interval, info.le.latency, info.le.timeout);
 	}
 }
 
-static struct bt_conn_cb conn_callbacks = {
+static struct bt_conn_cb conn_callbacks = 
+{
 	.connected			= connected,
 	.disconnected   	= disconnected,
 	.le_param_req		= le_param_req,
@@ -105,7 +113,8 @@ static struct bt_conn_cb conn_callbacks = {
 
 static void bt_ready(int err)
 {
-	if (err) {
+	if (err) 
+	{
 		printk("BLE init failed with error code %d\n", err);
 		return;
 	}
@@ -116,7 +125,8 @@ static void bt_ready(int err)
 	//Initalize services
 	err = my_service_init();
 
-	if (err) {
+	if (err) 
+	{
 		printk("Failed to init LBS (err:%d)\n", err);
 		return;
 	}
@@ -124,7 +134,8 @@ static void bt_ready(int err)
 	//Start advertising
 	err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad),
 			      sd, ARRAY_SIZE(sd));
-	if (err) {
+	if (err) 
+	{
 		printk("Advertising failed to start (err %d)\n", err);
 		return;
 	}
@@ -140,7 +151,7 @@ static void error(void)
 	while (true) {
 		printk("Error!\n");
 		/* Spin for ever */
-		k_sleep(1000);
+		k_sleep(1000); //ms
 	}
 }
 
@@ -148,13 +159,15 @@ void main(void)
 {
 	
 	int err = 0;
+	u32_t number = 0;
 
 	printk("Starting Nordic BLE peripheral tutorial\n");
 
 	
 	err = bt_enable(bt_ready);
 
-	if (err) {
+	if (err) 
+	{
 		printk("BLE initialization failed\n");
 		error(); //Catch error
 	}
@@ -166,15 +179,23 @@ void main(void)
 		execute other tasks while we wait. */	
 	err = k_sem_take(&ble_init_ok, K_MSEC(100));
 
-	if (!err) {
+	if (!err) 
+	{
 		printk("Bluetooth initialized\n");
-	} else {
+	} else 
+	{
 		printk("BLE initialization did not complete in time\n");
 		error(); //Catch error
 	}
 
-	for (;;) {
+	err = my_service_init();
+
+	for (;;) 
+	{
 		// Main loop
+		my_service_send(my_connection, &number, sizeof(number));
+		number++;
+		k_sleep(1000); //ms
 	}
 }
 

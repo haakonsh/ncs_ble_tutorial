@@ -24,7 +24,8 @@
 typedef void (*data_rx_cb_t)(u8_t *data, u8_t length);
 
 /** @brief Callback struct used by the my_service Service. */
-struct my_service_cb {
+struct my_service_cb 
+{
 	/** Data received callback. */
 	data_rx_cb_t    data_rx_cb;
 };
