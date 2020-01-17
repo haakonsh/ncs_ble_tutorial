@@ -38,12 +38,27 @@ static const struct bt_data sd[] = {
 
 static void connected(struct bt_conn *conn, u8_t err)
 {
+	struct bt_conn_info info; 
+	char addr[BT_ADDR_LE_STR_LEN];
+
 	if (err) {
 		printk("Connection failed (err %u)\n", err);
 		return;
 	}
-
-	printk("Connected\n");
+	else if(bt_conn_get_info(conn, &info)){
+		printk("Could not parse connection info\n");
+	}
+	else{
+		bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+		
+		printk("Connection established!		\n\
+		Connected to: %s					\n\
+		Role: %u							\n\
+		Connection interval: %u				\n\
+		Slave latency: %u					\n\
+		Connection supervisory timeout: %u	\n"
+		, addr, info.role, info.le.interval, info.le.latency, info.le.timeout);
+	}
 }
 
 static void disconnected(struct bt_conn *conn, u8_t reason)
@@ -59,8 +74,26 @@ static bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param)
 
 static void le_param_updated(struct bt_conn *conn, u16_t interval, u16_t latency, u16_t timeout)
 {
-	printk("BLE link parameters updated; Connection handle:%u, interval:%u, latency:%u, timeout:%u \n",
-			conn->handle, interval, latency, timeout);
+	struct bt_conn_info info; 
+	char addr[BT_ADDR_LE_STR_LEN];
+
+	if (err) {
+		printk("Could not update connection parameters (err %u)\n", err);
+		return;
+	}
+	else if(bt_conn_get_info(conn, &info)){
+		printk("Could not parse connection info\n");
+	}
+	else{
+		bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+		
+		printk("Connection parameters updated!	\n\
+		Connected to: %s						\n\
+		New Connection Interval: %u				\n\
+		New Slave Latency: %u					\n\
+		New Connection Supervisory Timeout: %u	\n"
+		, addr, info.role, info.le.interval, info.le.latency, info.le.timeout);
+	}
 }
 
 static struct bt_conn_cb conn_callbacks = {
@@ -81,7 +114,7 @@ static void bt_ready(int err)
 	bt_conn_cb_register(&conn_callbacks);
 
 	//Initalize services
-	err = my_service_init(&my_service_callbacs);
+	err = my_service_init();
 
 	if (err) {
 		printk("Failed to init LBS (err:%d)\n", err);

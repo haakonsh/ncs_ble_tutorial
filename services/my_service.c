@@ -19,7 +19,8 @@
 #define BT_UUID_MY_SERIVCE_RX   BT_UUID_DECLARE_128(RX_CHARACTERISTIC_UUID)
 #define BT_UUID_MY_SERIVCE_TX   BT_UUID_DECLARE_128(TX_CHARACTERISTIC_UUID)
 
-#define MAX_TRANSMIT_SIZE //TODO figure this out
+#define MAX_TRANSMIT_SIZE 240//TODO figure this out
+
 u8_t data_rx[MAX_TRANSMIT_SIZE];
 u8_t data_tx[MAX_TRANSMIT_SIZE];
 
@@ -79,8 +80,6 @@ BT_GATT_CCC(on_cccd_changed,
 given that the Client Characteristic Control Descripter has been set to Notify (0x1) */
 void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
 {
-    int err = 0;
-
     /* 
     The attribute for the TX characteristic is used with bt_gatt_is_subscribed 
     to check whether notification has been enabled by the peer or not.
@@ -88,15 +87,15 @@ void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
     */
     const struct bt_gatt_attr *attr = &my_service.attrs[3]; 
 
-    bt_gatt_notify_params params = {
+    struct bt_gatt_notify_params params = {
         .uuid   = BT_UUID_MY_SERIVCE_TX,
         .attr   = attr,
         .data   = data,
         .len    = len,
         .func   = on_sent
-    }
+    };
 
-    if (bt_gatt_is_subscribed(conn, attr, BT_GATT_CCC_NOTIFY)) {
+    if(bt_gatt_is_subscribed(conn, attr, BT_GATT_CCC_NOTIFY)) {
 	    if(bt_gatt_notify_cb(conn, &params)){
             printk("Error, unable to send notification\n");
         }
