@@ -23,6 +23,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
+#include <bluetooth/scan.h>
 
 #include "../services/my_service_client.h"
 
@@ -30,17 +31,6 @@
 #define DEVICE_NAME_LEN         (sizeof(DEVICE_NAME) - 1)
 
 static K_SEM_DEFINE(ble_init_ok, 0, 1);
-
-static const struct bt_data ad[] = 
-{
-	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-	BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
-};
-
-static const struct bt_data sd[] = 
-{
-	BT_DATA_BYTES(BT_DATA_UUID128_ALL, MY_SERVICE_UUID),
-};
 
 struct bt_conn *my_connection;
 
@@ -71,6 +61,14 @@ static void connected(struct bt_conn *conn, u8_t err)
 		Slave latency: %u					\n\
 		Connection supervisory timeout: %u	\n"
 		, addr, info.role, info.le.interval, info.le.latency, info.le.timeout);
+	}
+
+	err = bt_le_scan_stop(void);
+	
+	if (err) 
+	{
+		printk("Failed to stop scanning (err:%d)\n", err);
+		return;
 	}
 }
 
@@ -115,6 +113,21 @@ static struct bt_conn_cb conn_callbacks =
 	.le_param_updated	= le_param_updated
 };
 
+bool adv_data_parser_cb(struct bt_data *data, void *user_data)
+{
+	if(bt_data->type == )
+}
+
+bt_le_scan_cb_t scan_cb(const bt_addr_le_t *addr, s8_t rssi, u8_t adv_type, struct net_buf_simple *buf)
+{
+	bt_data_parse(buf, adv_data_parser_cb, void *user_data);
+}
+
+bt_br_discovery_cb_t discovery_cb(struct bt_br_discovery_result *results, size_t count)
+{
+
+}
+
 static void bt_ready(int err)
 {
 	if (err) 
@@ -131,20 +144,17 @@ static void bt_ready(int err)
 
 	if (err) 
 	{
-		printk("Failed to init LBS (err:%d)\n", err);
+		printk("Failed to init My Service Client (err:%d)\n", err);
 		return;
 	}
 
-	//Start advertising
-	err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad),
-			      sd, ARRAY_SIZE(sd));
+	err = bt_le_scan_start(BT_LE_SCAN_PARAM(BT_LE_SCAN_TYPE_ACTIVE, BT_LE_SCAN_FILTER_EXTENDED, 160, 160), scan_cb);
+
 	if (err) 
 	{
-		printk("Advertising failed to start (err %d)\n", err);
+		printk("Failed to start scanning (err:%d)\n", err);
 		return;
 	}
-
-	printk("Advertising successfully started\n");
 
 	k_sem_give(&ble_init_ok);
 }
@@ -197,7 +207,7 @@ void main(void)
 	for (;;) 
 	{
 		// Main loop
-		my_service_send(my_connection, (u8_t *)&number, sizeof(number));
+		
 		number++;
 		k_sleep(1000); //ms
 	}
