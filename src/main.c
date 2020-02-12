@@ -24,7 +24,7 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
-#include "../services/my_service.h"
+#include "../services/my_service_client.h"
 
 #define DEVICE_NAME             CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN         (sizeof(DEVICE_NAME) - 1)

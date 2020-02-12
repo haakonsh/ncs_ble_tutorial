@@ -20,6 +20,8 @@
 #define TX_CHARACTERISTIC_UUID  0xED, 0xAA, 0x20, 0x11, 0x92, 0xE7, 0x43, 0x5A, \
 			                    0xAA, 0xE9, 0x94, 0x43, 0x35, 0x6A, 0xD4, 0xD3
 
+/** @brief Callback type for when new data is received. */
+typedef void (*data_rx_cb_t)(u8_t *data, u8_t length);
 
 /** @brief Callback struct used by the my_service Service. */
 struct my_service_cb 
@@ -29,3 +31,5 @@ struct my_service_cb
 };
 
 int my_service_init(void);
+
+void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len);
