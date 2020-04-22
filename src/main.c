@@ -202,4 +202,3 @@ void main(void)
 		k_sleep(1000); //ms
 	}
 }
-

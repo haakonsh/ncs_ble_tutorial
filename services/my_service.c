@@ -15,9 +15,9 @@
 
 #include "my_service.h"
 
-#define BT_UUID_MY_SERIVCE      BT_UUID_DECLARE_128(MY_SERVICE_UUID)
-#define BT_UUID_MY_SERIVCE_RX   BT_UUID_DECLARE_128(RX_CHARACTERISTIC_UUID)
-#define BT_UUID_MY_SERIVCE_TX   BT_UUID_DECLARE_128(TX_CHARACTERISTIC_UUID)
+#define BT_UUID_MY_SERVICE      BT_UUID_DECLARE_128(MY_SERVICE_UUID)
+#define BT_UUID_MY_SERVICE_RX   BT_UUID_DECLARE_128(RX_CHARACTERISTIC_UUID)
+#define BT_UUID_MY_SERVICE_TX   BT_UUID_DECLARE_128(TX_CHARACTERISTIC_UUID)
 
 #define MAX_TRANSMIT_SIZE 240//TODO figure this out
 
@@ -81,12 +81,12 @@ void on_cccd_changed(const struct bt_gatt_attr *attr, u16_t value)
 
 /* LED Button Service Declaration and Registration */
 BT_GATT_SERVICE_DEFINE(my_service,
-BT_GATT_PRIMARY_SERVICE(BT_UUID_MY_SERIVCE),
-BT_GATT_CHARACTERISTIC(BT_UUID_MY_SERIVCE_RX,
+BT_GATT_PRIMARY_SERVICE(BT_UUID_MY_SERVICE),
+BT_GATT_CHARACTERISTIC(BT_UUID_MY_SERVICE_RX,
 			       BT_GATT_CHRC_WRITE | BT_GATT_CHRC_WRITE_WITHOUT_RESP,
 			       BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, 
                    NULL, on_receive, NULL),
-BT_GATT_CHARACTERISTIC(BT_UUID_MY_SERIVCE_TX,
+BT_GATT_CHARACTERISTIC(BT_UUID_MY_SERVICE_TX,
 			       BT_GATT_CHRC_NOTIFY,
 			       BT_GATT_PERM_READ,
                    NULL, NULL, NULL),
@@ -107,7 +107,7 @@ void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
 
     struct bt_gatt_notify_params params = 
     {
-        .uuid   = BT_UUID_MY_SERIVCE_TX,
+        .uuid   = BT_UUID_MY_SERVICE_TX,
         .attr   = attr,
         .data   = data,
         .len    = len,
