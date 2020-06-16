@@ -11,6 +11,7 @@
 #include <bluetooth/hci.h>
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
+#include <bluetooth/addr.h>
 #include <bluetooth/gatt.h>
 
 #include "my_service.h"
@@ -42,8 +43,13 @@ static ssize_t on_receive(struct bt_conn *conn,
 			  u16_t offset,
 			  u8_t flags)
 {
-	printk("Received data, handle %d, conn %p",
-		attr->handle, conn);
+    const u8_t * buffer = buf;
+    
+	printk("Received data, handle %d, conn %p, data: 0x", attr->handle, conn);
+    for(u8_t i = 0; i < len; i++){
+        printk("%02X", buffer[i]);
+    }
+    printk("\n");
 
 	return len;
 }
@@ -53,8 +59,16 @@ static void on_sent(struct bt_conn *conn, void *user_data)
 {
 	ARG_UNUSED(user_data);
 
-	printk("Data sent to Address %p", conn);
+    const bt_addr_le_t * addr = bt_conn_get_dst(conn);
+        
+	printk("Data sent to Address 0x %02X %02X %02X %02X %02X %02X \n", addr->a.val[0]
+                                                                    , addr->a.val[1]
+                                                                    , addr->a.val[2]
+                                                                    , addr->a.val[3]
+                                                                    , addr->a.val[4]
+                                                                    , addr->a.val[5]);
 }
+
 /* This function is called whenever the CCCD register has been changed by the client*/
 void on_cccd_changed(const struct bt_gatt_attr *attr, u16_t value)
 {
@@ -95,7 +109,8 @@ BT_GATT_CCC(on_cccd_changed,
 );
 
 /* This function sends a notification to a Client with the provided data,
-given that the Client Characteristic Control Descripter has been set to Notify (0x1) */
+given that the Client Characteristic Control Descripter has been set to Notify (0x1).
+It also calls the on_sent() callback if successful*/
 void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
 {
     /* 
@@ -125,6 +140,6 @@ void my_service_send(struct bt_conn *conn, const u8_t *data, uint16_t len)
     }
     else
     {
-        printk("Error, notification not enabled on the selected attribute\n");
+        printk("Warning, notification not enabled on the selected attribute\n");
     }
 }

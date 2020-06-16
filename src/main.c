@@ -109,10 +109,10 @@ static void le_param_updated(struct bt_conn *conn, u16_t interval, u16_t latency
 
 static struct bt_conn_cb conn_callbacks = 
 {
-	.connected			= connected,
-	.disconnected   	= disconnected,
-	.le_param_req		= le_param_req,
-	.le_param_updated	= le_param_updated
+	.connected				= connected,
+	.disconnected   		= disconnected,
+	.le_param_req			= le_param_req,
+	.le_param_updated		= le_param_updated
 };
 
 static void bt_ready(int err)
@@ -181,7 +181,7 @@ void main(void)
 		We use this semaphore to wait for bt_enable to call bt_ready before we proceed 		\
 		to the main loop. By using the semaphore to block execution we allow the RTOS to 	\
 		execute other tasks while we wait. */	
-	err = k_sem_take(&ble_init_ok, K_MSEC(100));
+	err = k_sem_take(&ble_init_ok, K_MSEC(500));
 
 	if (!err) 
 	{
