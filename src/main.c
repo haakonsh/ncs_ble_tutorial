@@ -155,7 +155,7 @@ static void error(void)
 	while (true) {
 		printk("Error!\n");
 		/* Spin for ever */
-		k_sleep(1000); //ms
+		k_sleep(K_MSEC(1000)); //1000ms
 	}
 }
 
@@ -199,6 +199,6 @@ void main(void)
 		// Main loop
 		my_service_send(my_connection, (u8_t *)&number, sizeof(number));
 		number++;
-		k_sleep(1000); //ms
+		k_sleep(K_MSEC(1000)); // 1000ms
 	}
 }
