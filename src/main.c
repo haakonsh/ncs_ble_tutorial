@@ -120,7 +120,24 @@ bool adv_data_parser_cb(struct bt_data *data, void *user_data)
 
 bt_le_scan_cb_t scan_cb(const bt_addr_le_t *addr, s8_t rssi, u8_t adv_type, struct net_buf_simple *buf)
 {
-	bt_data_parse(buf, adv_data_parser_cb, void *user_data);
+	// Create the necessary bt_scan_device_info in order to establish a connection
+	struct bt_scan_device_info peripheral;
+
+	peripheral.adv_info.adv_type = adv_type;
+	peripheral.adv_info.rssi = rssi;
+	peripheral.conn_param = BT_LE_CONN_PARAM_DEFAULT;
+	peripheral.adv_data = buf;
+
+	// Filter on connectable adv
+	if(adv_type == (BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED
+					| BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED_HIGH_DUTY_CYCLE
+					| BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED
+					| BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED
+					| BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_DIRECTED))
+	{
+		// parse the adv data
+		bt_data_parse(buf, adv_data_parser_cb, void *user_data);		
+	}
 }
 
 bt_br_discovery_cb_t discovery_cb(struct bt_br_discovery_result *results, size_t count)
@@ -148,6 +165,7 @@ static void bt_ready(int err)
 		return;
 	}
 
+	//Configure and start scan
 	err = bt_le_scan_start(BT_LE_SCAN_PARAM(BT_LE_SCAN_TYPE_ACTIVE, BT_LE_SCAN_FILTER_EXTENDED, 160, 160), scan_cb);
 
 	if (err) 
