@@ -113,9 +113,25 @@ static struct bt_conn_cb conn_callbacks =
 	.le_param_updated		= le_param_updated
 };
 
-bool adv_data_parser_cb(struct bt_data *data, void *user_data)
+bool adv_data_parser_cb(struct bt_data *adv_data, void *user_data)
 {
-	if(bt_data->type == )
+	u8_t sr_data[31]; // Maximum adv data packet size
+	
+	
+	
+	if(adv_data->type == BT_HCI_ADV_SCAN_RSP)
+	{
+		memcpy(sr_data[0], adv_data->data, adv_data->data_len);
+		printk("Scan Response data received: \n");
+		for(u8_t i = 0; i < adv_data->data_len ; i++)
+		{
+			printk("%0x02 ", sr_data[i]);
+		}
+		printk("\n");
+	}
+
+
+	return true;
 }
 
 bt_le_scan_cb_t scan_cb(const bt_addr_le_t *addr, s8_t rssi, u8_t adv_type, struct net_buf_simple *buf)
@@ -165,6 +181,7 @@ static void bt_ready(int err)
 		return;
 	}
 
+<<<<<<< HEAD
 	//Configure and start scan
 	err = bt_le_scan_start(BT_LE_SCAN_PARAM(BT_LE_SCAN_TYPE_ACTIVE, BT_LE_SCAN_FILTER_EXTENDED, 160, 160), scan_cb);
 
@@ -174,6 +191,8 @@ static void bt_ready(int err)
 		return;
 	}
 
+=======
+>>>>>>> 0c9f0055e7e981be084c58a1c8cf6c56b7f321a9
 	k_sem_give(&ble_init_ok);
 }
 
@@ -183,7 +202,7 @@ static void error(void)
 	while (true) {
 		printk("Error!\n");
 		/* Spin for ever */
-		k_sleep(1000); //ms
+		k_sleep(K_MSEC(1000)); //1000ms
 	}
 }
 
@@ -191,10 +210,8 @@ void main(void)
 {
 	
 	int err = 0;
-	u32_t number = 0;
 
-	printk("Starting Nordic BLE peripheral tutorial\n");
-
+	printk("Starting Nordic BLE central tutorial\n");
 	
 	err = bt_enable(bt_ready);
 
@@ -203,8 +220,8 @@ void main(void)
 		printk("BLE initialization failed\n");
 		error(); //Catch error
 	}
-	
-	/* 	Bluetooth stack should be ready in less than 100 msec. 								\
+
+	/* 	Bluetooth stack should be ready in less than 500 msec. 								\
 																							\
 		We use this semaphore to wait for bt_enable to call bt_ready before we proceed 		\
 		to the main loop. By using the semaphore to block execution we allow the RTOS to 	\
@@ -220,13 +237,26 @@ void main(void)
 		error(); //Catch error
 	}
 
+	err = bt_le_scan_start(BT_LE_SCAN_PARAM(BT_LE_SCAN_TYPE_ACTIVE, BT_LE_SCAN_FILTER_EXTENDED, 160, 160), scan_cb);
+
+	if (err) 
+	{
+		printk("Failed to start scanning (err:%d)\n", err);
+		return;
+	}
+	
 	err = my_service_init();
+
+	if (err) 
+	{
+		printk("Failed to initialize my_service (err:%d)\n", err);
+		return;
+	}
 
 	for (;;) 
 	{
 		// Main loop
 		
-		number++;
-		k_sleep(1000); //ms
+		k_sleep(K_MSEC(1000)); //1000ms
 	}
 }
